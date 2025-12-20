@@ -3,7 +3,7 @@ name: Build & Publish WAR to Nexus
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 env:
