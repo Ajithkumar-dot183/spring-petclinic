@@ -34,4 +34,4 @@ jobs:
         run: |
           curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
           --upload-file target/*.war \
-          http://18.215.176.79:8081/repository/githubactions-spring3/org/springframework/samples/spring-petclinic/4.2.5-SNAPSHOT/spring-petclinic-4.2.5-SNAPSHOT.war
+          http://18.215.176.79:8081/repository/github-petclinic/org/springframework/samples/spring-petclinic/4.2.5-SNAPSHOT/spring-petclinic-4.2.5-SNAPSHOT.war
