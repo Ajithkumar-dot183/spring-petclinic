@@ -25,4 +25,18 @@ jobs:
 
      
       - name: Build Maven project
-        run: mvn clean package
+        run: mvn package
+
+      
+      - name: Upload WAR to Nexus
+        run: |
+          mvn deploy:deploy-file \
+            -Dfile=/home/runner/work/spring-petclinic/spring-petclinic/target/petclinic.war \
+            -DgroupId=org.springframework.samples \
+            -DartifactId=spring-petclinic \
+            -Dversion=4.2.5-SNAPSHOT \
+            -Dpackaging=war \
+            -DrepositoryId=github-petclinic/ \
+            -Durl=http://18.215.176.79:8081/repository/github-petclinic/ \
+            -Dusername=${{ secrets.NEXUS_USERNAME }} \
+            -Dpassword=${{ secrets.NEXUS_PASSWORD }}
