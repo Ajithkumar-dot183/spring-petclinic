@@ -1,54 +1,37 @@
-name: Build & Publish WAR to Nexus
+name: Build and Upload to Nexus (No Maven Deploy)
 
 on:
   push:
     branches:
       - master
-  workflow_dispatch:
-
-env:
-  NEXUS_PROTOCOL: http
-  NEXUS_URL: 18.215.176.79:8081/
-  NEXUS_REPOSITORY: github-petclinic
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v4
+      # 1️⃣ Checkout code
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-    - name: Setup Java & Maven
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: '8'
-        cache: maven
+      # 2️⃣ Setup Java
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
 
-    - name: Build WAR
-      run: mvn clean package
+      # 3️⃣ Build project (ONLY package)
+      - name: Build Maven project
+        run: mvn clean package
 
-    - name: Extract Maven coordinates dynamically
-      id: maven-info
-      run: |
-        GROUP_ID=$(mvn help:evaluate -Dexpression=project.groupId -q -DforceStdout)
-        ARTIFACT_ID=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
-        VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        PACKAGING=$(mvn help:evaluate -Dexpression=project.packaging -q -DforceStdout)
+      # 4️⃣ Show build output
+      - name: List target directory
+        run: ls -l target
 
-        WAR_FILE=$(ls target/*.${PACKAGING})
-
-        echo "GROUP_ID=${GROUP_ID}" >> $GITHUB_ENV
-        echo "ARTIFACT_ID=${ARTIFACT_ID}" >> $GITHUB_ENV
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
-        echo "PACKAGING=${PACKAGING}" >> $GITHUB_ENV
-        echo "WAR_FILE=${WAR_FILE}" >> $GITHUB_ENV
-
-    - name: Upload WAR to Nexus
-      run: |
-        NEXUS_PATH="${GROUP_ID//.//}/${ARTIFACT_ID}/${VERSION}"
-
-        curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
-          --upload-file "${WAR_FILE}" \
-          "${NEXUS_PROTOCOL}://${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/${NEXUS_PATH}/${ARTIFACT_ID}-${VERSION}.${PACKAGING}"
+      # 5️⃣ Upload artifact to Nexus using CURL
+      - name: Upload artifact to Nexus
+        run: |
+          curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+          --upload-file target/*.jar \
+          http://18.215.176.79:8081/repository/githubactions-spring3/org/springframework/samples/spring-petclinic/4.2.5-SNAPSHOT/spring-petclinic-4.2.5-SNAPSHOT.jar
