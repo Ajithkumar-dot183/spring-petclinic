@@ -3,7 +3,7 @@ name: Build & Publish WAR to Nexus
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 env:
@@ -44,3 +44,11 @@ jobs:
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
         echo "PACKAGING=${PACKAGING}" >> $GITHUB_ENV
         echo "WAR_FILE=${WAR_FILE}" >> $GITHUB_ENV
+
+    - name: Upload WAR to Nexus
+      run: |
+        NEXUS_PATH="${GROUP_ID//.//}/${ARTIFACT_ID}/${VERSION}"
+
+        curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+          --upload-file "${WAR_FILE}" \
+          "${NEXUS_PROTOCOL}://${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/${NEXUS_PATH}/${ARTIFACT_ID}-${VERSION}.${PACKAGING}"
