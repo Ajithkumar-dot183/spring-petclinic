@@ -23,6 +23,8 @@ jobs:
 
       - name: Build Maven project
         run: mvn clean package
+      - name: List target directory
+        run: ls -l target
 
       - name: Upload WAR to Nexus
         run: |
